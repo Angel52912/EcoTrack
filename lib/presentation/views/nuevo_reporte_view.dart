@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/alerta_controller.dart';
 import '../controllers/formulario_controller.dart';
 import '../controllers/reporte_controller.dart';
 
@@ -14,11 +15,13 @@ class NuevoReporteView extends StatefulWidget {
     super.key,
     required this.formulario,
     required this.reportes,
+    required this.alertas,
     required this.onGuardado,
   });
 
   final FormularioController formulario;
   final ReporteController reportes;
+  final AlertaController alertas;
   final VoidCallback onGuardado;
 
   @override
@@ -55,6 +58,9 @@ class _NuevoReporteViewState extends State<NuevoReporteView> {
 
     setState(() => _enviando = false);
     if (guardado) {
+      // Modulo 4.3: notificacion local de alta prioridad al confirmar envio.
+      await widget.alertas.confirmarEnvio(reporte.codigo);
+      if (!mounted) return;
       formulario.restablecer();
       // Remonta el `Form` para limpiar visualmente la captura.
       setState(() => _llaveFormulario = GlobalKey<FormState>());
