@@ -8,6 +8,10 @@ import 'data/local/reporte_dao.dart';
 import 'data/local/zona_dao.dart';
 import 'data/remote/fuente_api_ecotrack.dart';
 import 'data/repositories/repositorio_reportes_impl.dart';
+import 'data/sensores/fuente_acelerometro.dart';
+import 'data/services/servicio_alertas_local.dart';
+import 'data/workmanager/tarea_periodica.dart';
+import 'presentation/controllers/alerta_controller.dart';
 import 'presentation/controllers/catalogo_controller.dart';
 import 'presentation/controllers/formulario_controller.dart';
 import 'presentation/controllers/reporte_controller.dart';
@@ -53,6 +57,22 @@ Future<void> main() async {
     api: api,
   );
 
+  // ---------------------------------------------------------------------------
+  // Modulo 4: sensores, audio local, notificaciones y trabajo periodico.
+  // ---------------------------------------------------------------------------
+  final servicioAlertas = ServicioAlertasLocal();
+  await servicioAlertas.inicializar();
+
+  try {
+    await configurarTareaPeriodica();
+  } catch (_) {
+    // Workmanager no esta disponible en todas las plataformas de escritorio.
+  }
+
+  final controladorAlertas = AlertaController(
+    servicio: servicioAlertas,
+    acelerometro: FuenteAcelerometro().lecturas(),
+  );
   final controladorReportes = ReporteController(repositorio: repositorio);
   final controladorCatalogo = CatalogoController(repositorio: repositorio);
   final controladorFormulario = FormularioController();
@@ -62,6 +82,7 @@ Future<void> main() async {
       reportes: controladorReportes,
       catalogo: controladorCatalogo,
       formulario: controladorFormulario,
+      alertas: controladorAlertas,
     ),
   );
 
