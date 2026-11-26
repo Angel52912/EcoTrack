@@ -24,7 +24,11 @@ lib/
 │   ├── models/                #   toMap / fromMap (serializacion SQLite)
 │   ├── local/                 #   AppDatabase (.db) + patrones DAO
 │   ├── remote/                #   FuenteApiEcoTrack (http + Bearer JWT)
-│   └── repositories/          #   RepositorioReportesImpl (Offline-First)
+│   ├── repositories/          #   RepositorioReportesImpl (Offline-First)
+│   ├── sensores/              #   FuenteAcelerometro (sensors_plus -> dominio)
+│   ├── services/              #   ServicioAlertasLocal (audioplayers + notificaciones)
+│   ├── sincronizacion/        #   SincronizadorReportes (cola offline -> API)
+│   └── workmanager/           #   Tarea periodica @pragma('vm:entry-point')
 └── presentation/
     ├── controllers/           #   ChangeNotifier con notifyListeners()
     └── views/                 #   Vistas pasivas Material 3
@@ -42,7 +46,8 @@ dentro de los metodos `build`.
 | **1. Arquitectura y GitFlow** | Tres paquetes aislados, `.gitignore` estricto, ramas `main` / `develop` / `feature/*` con Pull Requests | todo el repo |
 | **2. UI y estado desacoplado** | `CustomScrollView` + `SliverAppBar` colapsable, filtros `Wrap`, `GridView.builder` con `SliverGridDelegateWithMaxCrossAxisExtent`, `Form` + `GlobalKey<FormState>` con RegExp, boton bloqueado (`onPressed: null`) hasta aceptar terminos, `ChangeNotifier` + `ListenableBuilder` | `lib/presentation/` |
 | **3. Persistencia y API** | SQLite `.db` con patron DAO, columnas explicitas y `whereArgs` (anti inyeccion SQL); API REST con cabecera `Authorization: Bearer <token>`, decodificacion JSON y `rethrow` | `lib/data/` |
-| **5. Calidad y telemetria** | 51 pruebas (unitarias + widgets) con patron Arrange-Act-Assert, `FlutterError.onError` y `PlatformDispatcher.instance.onError` | `test/`, `lib/telemetria.dart`, `lib/main.dart` |
+| **4. Sensores, multimedia y notificaciones** | Acelerometro (`sensors_plus`) escuchado en `initState`, umbral 15 m/s2 en X/Y/Z, audio local `assets/audio/` con cooldown y simulacion manual, notificacion `Importance.max`, Workmanager con `NetworkType.connected` que **sincroniza la cola offline real** (DAO pendientes -> API -> marcar, con FFI en el isolate) y liberacion total en `dispose()` | `lib/data/sensores/`, `lib/data/services/`, `lib/data/workmanager/`, `lib/data/sincronizacion/`, `lib/presentation/controllers/alerta_controller.dart` |
+| **5. Calidad y telemetria** | 66 pruebas (unitarias + widgets) con patron Arrange-Act-Assert, `FlutterError.onError` y `PlatformDispatcher.instance.onError` | `test/`, `lib/telemetria.dart`, `lib/main.dart` |
 
 ---
 
@@ -51,7 +56,7 @@ dentro de los metodos `build`.
 ```bash
 flutter pub get
 flutter analyze
-flutter test                 # 51 pruebas en verde
+flutter test                 # 66 pruebas en verde
 flutter run                  # en dispositivo/emulador Android
 ```
 

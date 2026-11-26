@@ -11,6 +11,12 @@ class AppConfig {
     'https://jsonplaceholder.typicode.com/albums/1/photos',
   );
 
+  /// Endpoint al que se **suben** los reportes de la cola offline
+  /// (Modulo 3.3 + Módulo 4.3, tarea periodica de sincronizacion).
+  static final Uri apiReportes = Uri.parse(
+    'https://jsonplaceholder.typicode.com/posts',
+  );
+
   /// Token JWT (ficticio, firmado solo para la practica) que se inyecta en la
   /// cabecera `Authorization: Bearer <token>` de cada peticion.
   static const String tokenJwt =
