@@ -45,13 +45,14 @@ dependencies:
   flutter_local_notifications: ^23.0.4
   workmanager: ^0.10.10
 
+  # SQLite via FFI: el isolate de Workmanager no tiene registrado el canal
+  # nativo de `sqflite`, por lo que la cola offline se lee/escribe con FFI.
+  # Tambien se usa en `flutter test` para correr el DAO sin emulador.
+  sqflite_common_ffi: ^2.3.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  # Permite correr la capa de datos (DAO/SQLite) dentro de `flutter test`
-  # sin depender de un dispositivo Android/emulador.
-  sqflite_common_ffi: ^2.3.4
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
