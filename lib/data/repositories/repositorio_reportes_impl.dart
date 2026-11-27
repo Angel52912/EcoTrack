@@ -6,6 +6,7 @@ import '../local/zona_dao.dart';
 import '../models/reporte_model.dart';
 import '../models/zona_model.dart';
 import '../remote/fuente_api_ecotrack.dart';
+import '../sincronizacion/sincronizador_reportes.dart';
 
 /// Modulo 1 y Modulo 3 - Puente entre el dominio y las fuentes de datos.
 ///
@@ -59,5 +60,16 @@ class RepositorioReportesImpl implements RepositorioReportes {
   Future<List<Zona>> descargarZonas({required String token}) {
     // Las excepciones de red NO se tragan aqui: se repropagan al controlador.
     return _api.descargarZonas(token: token);
+  }
+
+  @override
+  Future<int> sincronizarReportesPendientes({required String token}) {
+    // Misma logica que usa la tarea periodica de Workmanager: DAO -> API ->
+    // marcar. Las excepciones se repropagan para que el llamador informe.
+    return SincronizadorReportes(
+      dao: _reportes,
+      api: _api,
+      token: token,
+    ).sincronizar();
   }
 }
