@@ -98,4 +98,41 @@ void main() {
     expect(controlador.estadoRed, contains('Sin conexion'));
     expect(controlador.sincronizando, isFalse);
   });
+
+  test(
+      'Arrange: 2 reportes pendientes y red OK | Act: sincronizar() | '
+      'Assert: la cola se envia y el mensaje lo informa', () async {
+    // Arrange
+    repositorio.reportes
+      ..add(reporteDePrueba(id: 'r_p1'))
+      ..add(reporteDePrueba(id: 'r_p2', codigo: 'EC-2026-BR'));
+
+    // Act
+    await controlador.sincronizar();
+
+    // Assert
+    expect(repositorio.reportesEnviados, 2,
+        reason: 'El boton "Sincronizar" debe subir la cola de reportes');
+    expect(repositorio.reportes.every((r) => r.sincronizado), isTrue,
+        reason: 'Solo se marcan tras confirmar la API');
+    expect(controlador.estadoRed, contains('2 reportes enviados'));
+    expect(repositorio.ultimoToken, AppConfig.tokenJwt);
+  });
+
+  test(
+      'Arrange: reportes pendientes sin conexion | Act: sincronizar() | '
+      'Assert: la cola sigue pendiente (nunca se marca sin 2xx)', () async {
+    // Arrange
+    repositorio.reportes.add(reporteDePrueba(id: 'r_off'));
+    repositorio.redCaida = true;
+
+    // Act
+    await controlador.sincronizar();
+
+    // Assert
+    expect(repositorio.reportesEnviados, 0);
+    expect(repositorio.reportes.single.pendienteDeSincronizar, isTrue,
+        reason: 'Offline-First: sin confirmacion no se marca');
+    expect(controlador.estadoRed, contains('Sin conexion'));
+  });
 }

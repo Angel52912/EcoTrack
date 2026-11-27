@@ -28,4 +28,11 @@ abstract interface class RepositorioReportes {
   /// de red** (el llamador decide que hacer: la capa de presentacion
   /// conserva los datos locales y solo informa "sin conexion").
   Future<List<Zona>> descargarZonas({required String token});
+
+  /// Envia a la nube todos los reportes marcados como pendientes y los
+  /// marca como sincronizados **solo despues** de que la API confirma 2xx.
+  ///
+  /// Devuelve cuantos se enviaron en esta corrida; si un envio falla, la
+  /// excepcion se propaga y lo demas queda en la cola (Offline-First).
+  Future<int> sincronizarReportesPendientes({required String token});
 }
