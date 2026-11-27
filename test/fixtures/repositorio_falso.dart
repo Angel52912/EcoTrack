@@ -18,6 +18,9 @@ class RepositorioFalso implements RepositorioReportes {
 
   int descargasRealizadas = 0;
 
+  /// Reportes que la ultima sincronizacion confirmo ante la nube.
+  int reportesEnviados = 0;
+
   /// Simula fallo de escritura local.
   bool fallarAlGuardar = false;
 
@@ -78,6 +81,41 @@ class RepositorioFalso implements RepositorioReportes {
         tipoIcono: Zona.tipoCamion,
       ),
     ];
+  }
+
+  @override
+  Future<int> sincronizarReportesPendientes({required String token}) async {
+    ultimoToken = token;
+    if (redCaida) {
+      throw Exception('SocketException: connection refused');
+    }
+
+    final pendientes = reportes
+        .where((r) => r.pendienteDeSincronizar)
+        .toList(growable: false);
+    if (pendientes.isEmpty) return 0;
+
+    // Solo se marcan como sincronizados tras "confirmar" la API (2xx).
+    reportes
+      ..clear()
+      ..addAll([
+        for (final r in reportes)
+          r.pendienteDeSincronizar
+              ? Reporte(
+                  id: r.id,
+                  codigo: r.codigo,
+                  titulo: r.titulo,
+                  detalle: r.detalle,
+                  categoria: r.categoria,
+                  prioridad: r.prioridad,
+                  registradoEn: r.registradoEn,
+                  sincronizado: true,
+                )
+              : r,
+      ]);
+
+    reportesEnviados += pendientes.length;
+    return pendientes.length;
   }
 }
 

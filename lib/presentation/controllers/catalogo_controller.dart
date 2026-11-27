@@ -52,29 +52,59 @@ class CatalogoController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sincroniza con la API REST.
+  /// Sincroniza con la API REST **y** envia la cola de reportes pendientes.
   ///
   /// Si la red falla, la excepcion capturada deja **intactos** los datos
   /// locales (Offline-First) y solo actualiza el mensaje de estado.
+  ///
+  /// Zonas y reportes se intentan por separado: un fallo en el catalogo no
+  /// debe impedir subir los reportes ya capturados, ni viceversa.
   Future<void> sincronizar() async {
     if (_sincronizando) return;
     _sincronizando = true;
     _estadoRed = 'Sincronizando con la nube...';
     notifyListeners();
+
+    var zonasActualizadas = 0;
+    var reportesEnviados = 0;
+    var falloZonas = false;
+    var falloReportes = false;
+
     try {
       final zonas = await _repositorio.descargarZonas(
         token: AppConfig.tokenJwt,
       );
       await _repositorio.guardarZonas(zonas);
       _zonas = await _repositorio.obtenerZonas();
-      _estadoRed = 'Sincronizado: ${zonas.length} zonas actualizadas';
+      zonasActualizadas = zonas.length;
     } catch (_) {
+      falloZonas = true;
+    }
+
+    try {
+      reportesEnviados = await _repositorio.sincronizarReportesPendientes(
+        token: AppConfig.tokenJwt,
+      );
+    } catch (_) {
+      falloReportes = true;
+    }
+
+    if (falloZonas && falloReportes) {
       _estadoRed =
           'Sin conexion: catalogo local intacto (${_zonas.length} zonas)';
-    } finally {
-      _sincronizando = false;
-      notifyListeners();
+    } else if (falloReportes) {
+      _estadoRed = 'Catalogo: $zonasActualizadas zonas. '
+          'La cola de reportes sigue pendiente (se reintentara).';
+    } else if (falloZonas) {
+      _estadoRed = 'Cola enviada: $reportesEnviados reportes. '
+          'El catalogo de zonas no se pudo actualizar.';
+    } else {
+      _estadoRed = 'Sincronizado: $zonasActualizadas zonas y '
+          '$reportesEnviados reportes enviados';
     }
+
+    _sincronizando = false;
+    notifyListeners();
   }
 
   void limpiarEstadoRed() {

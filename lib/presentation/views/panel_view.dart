@@ -21,6 +21,16 @@ class PanelView extends StatelessWidget {
   final CatalogoController catalogo;
   final VoidCallback onNuevoReporte;
 
+  /// Accion del boton "Sincronizar ahora".
+  ///
+  /// Orquesta los dos controladores: primero sube la cola de reportes y
+  /// descarga el catalogo, luego refresca el resumen para que el contador
+  /// "Pendientes de sincronizar" baje a 0. No hay SQL ni HTTP aqui.
+  Future<void> _sincronizar() async {
+    await catalogo.sincronizar();
+    await reportes.cargar();
+  }
+
   @override
   Widget build(BuildContext context) {
     final esAncho = MediaQuery.sizeOf(context).width >= 720;
@@ -42,8 +52,7 @@ class PanelView extends StatelessWidget {
               actions: [
                 IconButton(
                   tooltip: 'Sincronizar con la nube',
-                  onPressed:
-                      catalogo.sincronizando ? null : () => catalogo.sincronizar(),
+                  onPressed: catalogo.sincronizando ? null : _sincronizar,
                   icon: const Icon(Icons.cloud_sync_outlined),
                 ),
                 IconButton(
@@ -175,6 +184,13 @@ class _BarraDeFiltros extends StatelessWidget {
   final CatalogoController catalogo;
   final bool esAncho;
 
+  /// Mismo flujo que el icono del `SliverAppBar`: sube la cola de reportes,
+  /// descarga el catalogo y refresca el resumen observable del panel.
+  Future<void> _sincronizar() async {
+    await catalogo.sincronizar();
+    await reportes.cargar();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -202,9 +218,7 @@ class _BarraDeFiltros extends StatelessWidget {
                     ),
                   const SizedBox(width: 8),
                   FilledButton.tonalIcon(
-                    onPressed: catalogo.sincronizando
-                        ? null
-                        : () => catalogo.sincronizar(),
+                    onPressed: catalogo.sincronizando ? null : _sincronizar,
                     icon: catalogo.sincronizando
                         ? const SizedBox(
                             width: 16,

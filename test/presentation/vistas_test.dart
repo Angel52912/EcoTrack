@@ -365,4 +365,57 @@ void main() {
       expect(escenario.catalogo.riesgoActivo, 4);
     });
   });
+
+  group('Modulo 3.3 - Boton "Sincronizar ahora" envia la cola offline', () {
+    testWidgets(
+        'Arrange: 3 reportes pendientes | '
+        'Act: pulsar Sincronizar | '
+        'Assert: el resumen baja a 0 pendientes y el estado lo informa',
+        (tester) async {
+      // Arrange: los tres reportes de la semilla nacen sin sincronizar.
+      final escenario = await preparar(tester);
+      expect(
+        find.textContaining('Pendientes de sincronizar: 3'),
+        findsOneWidget,
+      );
+
+      // Act
+      await tester.tap(find.text('Sincronizar ahora'));
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(
+        find.textContaining('Pendientes de sincronizar: 0'),
+        findsOneWidget,
+        reason: 'Tras sincronizar el contador del panel debe bajar a 0',
+      );
+      expect(escenario.repositorio.reportesEnviados, 3);
+      expect(escenario.repositorio.reportes.every((r) => r.sincronizado),
+          isTrue);
+      expect(escenario.catalogo.estadoRed, contains('3 reportes enviados'));
+    });
+
+    testWidgets(
+        'Arrange: cola pendiente con la red caida | '
+        'Act: pulsar Sincronizar | '
+        'Assert: los reportes siguen pendientes y el aviso lo dice',
+        (tester) async {
+      // Arrange
+      final escenario = await preparar(tester);
+      escenario.repositorio.redCaida = true;
+
+      // Act
+      await tester.tap(find.text('Sincronizar ahora'));
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(
+        find.textContaining('Pendientes de sincronizar: 3'),
+        findsOneWidget,
+        reason: 'Sin confirmacion de la API nadie se marca como sincronizado',
+      );
+      expect(escenario.repositorio.reportesEnviados, 0);
+      expect(escenario.catalogo.estadoRed, contains('Sin conexion'));
+    });
+  });
 }
