@@ -31,7 +31,9 @@ lib/
 │   └── workmanager/           #   Tarea periodica @pragma('vm:entry-point')
 └── presentation/
     ├── controllers/           #   ChangeNotifier con notifyListeners()
-    └── views/                 #   Vistas pasivas Material 3
+    └── views/                 #   Vistas pasivas Material 3 +
+                               #   estilos.dart (colores/iconos) e
+                               #   ilustraciones.dart (CustomPainter)
 ```
 
 **Regla de Oro respetada:** no existe logica de negocio, SQL ni peticiones HTTP
@@ -44,11 +46,11 @@ dentro de los metodos `build`.
 | Modulo | Contenido | Ubicacion |
 |---|---|---|
 | **1. Arquitectura y GitFlow** | Tres paquetes aislados, `.gitignore` estricto, ramas `main` / `develop` / `feature/*` con Pull Requests | todo el repo |
-| **2. UI y estado desacoplado** | `CustomScrollView` + `SliverAppBar` colapsable, filtros `Wrap`, `GridView.builder` con `SliverGridDelegateWithMaxCrossAxisExtent`, `Form` + `GlobalKey<FormState>` con RegExp, boton bloqueado (`onPressed: null`) hasta aceptar terminos, `ChangeNotifier` + `ListenableBuilder` | `lib/presentation/` |
+| **2. UI y estado desacoplado** | `CustomScrollView` + `SliverAppBar` colapsable, filtros `Wrap`, `GridView.builder` con `SliverGridDelegateWithMaxCrossAxisExtent`, `Form` + `GlobalKey<FormState>` con RegExp, boton bloqueado (`onPressed: null`) hasta aceptar terminos, `ChangeNotifier` + `ListenableBuilder`, ilustraciones `CustomPainter` por lugar/categoria (`Escena`) y tema Material 3 unico (`Estilos`) | `lib/presentation/` |
 | **3. Persistencia y API** | SQLite `.db` con patron DAO, columnas explicitas y `whereArgs` (anti inyeccion SQL); API REST con cabecera `Authorization: Bearer <token>`, decodificacion JSON y `rethrow` | `lib/data/` |
 | **4. Sensores, multimedia y notificaciones** | Acelerometro (`sensors_plus`) escuchado en `initState`, umbral 15 m/s2 en X/Y/Z, audio local `assets/audio/` con cooldown y simulacion manual, notificacion `Importance.max`, Workmanager con `NetworkType.connected` que **sincroniza la cola offline real** (DAO pendientes -> API -> marcar; la ruta del `.db` viaja en `inputData` para que el isolate FFI abra el mismo archivo que la app) y liberacion total en `dispose()` | `lib/data/sensores/`, `lib/data/services/`, `lib/data/workmanager/`, `lib/data/sincronizacion/`, `lib/presentation/controllers/alerta_controller.dart` |
 | **3.3 Boton "Sincronizar ahora"** | El boton del panel sube la cola de reportes pendientes **y** descarga el catalogo (`RepositorioReportes.sincronizarReportesPendientes`), luego refresca el resumen para que el contador baje a 0 | `lib/presentation/controllers/catalogo_controller.dart`, `lib/presentation/views/panel_view.dart` |
-| **5. Calidad y telemetria** | 70 pruebas (unitarias + widgets) con patron Arrange-Act-Assert, `FlutterError.onError` y `PlatformDispatcher.instance.onError` | `test/`, `lib/telemetria.dart`, `lib/main.dart` |
+| **5. Calidad y telemetria** | 79 pruebas (unitarias + widgets) con patron Arrange-Act-Assert, `FlutterError.onError` y `PlatformDispatcher.instance.onError` | `test/`, `lib/telemetria.dart`, `lib/main.dart` |
 
 ---
 
@@ -57,7 +59,7 @@ dentro de los metodos `build`.
 ```bash
 flutter pub get
 flutter analyze
-flutter test                 # 70 pruebas en verde
+flutter test                 # 79 pruebas en verde
 flutter run                  # en dispositivo/emulador Android
 ```
 

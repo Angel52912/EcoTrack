@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/zona.dart';
 import '../controllers/catalogo_controller.dart';
+import 'estilos.dart';
+import 'ilustraciones.dart';
 
 /// Modulo 2.1 - Catalogo bidimensional.
 ///
@@ -12,13 +14,6 @@ class CatalogoView extends StatelessWidget {
   const CatalogoView({super.key, required this.catalogo});
 
   final CatalogoController catalogo;
-
-  static const List<IconData> _iconos = [
-    Icons.route_rounded,
-    Icons.local_shipping_rounded,
-    Icons.inventory_2_rounded,
-    Icons.warning_amber_rounded,
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -73,86 +68,114 @@ class CatalogoView extends StatelessWidget {
                       itemCount: zonas.length,
                       itemBuilder: (context, indice) {
                         final zona = zonas[indice];
-                        final esquema = Theme.of(context).colorScheme;
-                        final colorRiesgo = switch (zona.riesgo) {
-                          1 => const Color(0xFF16A34A),
-                          2 => const Color(0xFFF59E0B),
-                          3 => const Color(0xFFEA580C),
-                          _ => const Color(0xFFDC2626),
-                        };
+                        // El unico lugar que traduce riesgo/icono a color:
+                        // `Estilos` (capa presentation).
+                        final colorRiesgo = Estilos.colorRiesgo(zona.riesgo);
 
                         return Card(
                           key: Key('zona_${zona.id}'),
                           clipBehavior: Clip.antiAlias,
                           child: InkWell(
                             onTap: () => _mostrarDetalle(context, zona),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(
-                                    _iconos[zona.tipoIcono],
-                                    size: 34,
-                                    color: esquema.primary,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    zona.nombre,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    zona.ruta,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall,
-                                  ),
-                                  const Spacer(),
-                                  // Wrap evita el RenderFlex Overflow en
-                                  // celdas angostas (celular en vertical).
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 4,
-                                    alignment: WrapAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.center,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Ilustracion del lugar que cubre la zona.
+                                SizedBox(
+                                  height: 84,
+                                  width: double.infinity,
+                                  child: Stack(
+                                    fit: StackFit.expand,
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: colorRiesgo
-                                              .withValues(alpha: 0.15),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        child: Text(
-                                          zona.etiquetaRiesgo,
-                                          style: TextStyle(
-                                            color: colorRiesgo,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                                      Ilustracion(
+                                        escena: Escena.deLugar(zona.lugar),
+                                        radio: 0,
                                       ),
-                                      Text(
-                                        '${zona.entregasPendientes} pedidos',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelSmall,
+                                      Positioned(
+                                        left: 8,
+                                        top: 8,
+                                        child: Icon(
+                                          Estilos.iconoZona(zona.tipoIcono),
+                                          size: 26,
+                                          color: Colors.white,
+                                          shadows: const [
+                                            Shadow(
+                                              color: Colors.black54,
+                                              blurRadius: 6,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        zona.nombre,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        zona.ruta,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      // Wrap evita el RenderFlex Overflow en
+                                      // celdas angostas (celular en vertical).
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 4,
+                                        alignment: WrapAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        children: [
+                                          Container(
+                                            padding:
+                                                const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: colorRiesgo
+                                                  .withValues(alpha: 0.15),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              zona.etiquetaRiesgo,
+                                              style: TextStyle(
+                                                color: colorRiesgo,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            '${zona.entregasPendientes} pedidos',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -174,9 +197,37 @@ class CatalogoView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Ilustracion del lugar + icono del riesgo (sin logica en build).
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: SizedBox(
+                height: 140,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Ilustracion(escena: Escena.deLugar(zona.lugar)),
+                    Positioned(
+                      right: 12,
+                      top: 12,
+                      child: Icon(
+                        Estilos.iconoZona(zona.tipoIcono),
+                        size: 30,
+                        color: Estilos.colorRiesgo(zona.riesgo),
+                        shadows: const [
+                          Shadow(color: Colors.black45, blurRadius: 8),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Text(zona.nombre, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text('Ruta: ${zona.ruta}'),
+            Text('Lugar: ${zona.lugar.name}'),
             Text('Riesgo: ${zona.etiquetaRiesgo}'),
             Text('Entregas pendientes: ${zona.entregasPendientes}'),
             Text(

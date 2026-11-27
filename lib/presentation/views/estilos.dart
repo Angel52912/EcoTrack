@@ -13,6 +13,7 @@ class Estilos {
   static ThemeData tema(Brightness brillo) => ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(seedColor: verde, brightness: brillo),
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     inputDecorationTheme: const InputDecorationTheme(
       border: OutlineInputBorder(),
     ),

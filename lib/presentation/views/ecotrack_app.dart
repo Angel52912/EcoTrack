@@ -5,6 +5,7 @@ import '../controllers/alerta_controller.dart';
 import '../controllers/catalogo_controller.dart';
 import '../controllers/formulario_controller.dart';
 import '../controllers/reporte_controller.dart';
+import 'estilos.dart';
 import 'home_view.dart';
 
 /// Raiz de la interfaz (Material 3). Recibe los controladores ya inyectados
@@ -28,16 +29,9 @@ class EcoTrackApp extends StatelessWidget {
     return MaterialApp(
       title: AppConfig.nombreApp,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF16A34A),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF16A34A),
-        brightness: Brightness.dark,
-      ),
+      // Tema unico en `Estilos` (traduccion de datos a elementos visuales).
+      theme: Estilos.tema(Brightness.light),
+      darkTheme: Estilos.tema(Brightness.dark),
       themeMode: ThemeMode.system,
       home: HomeView(
         reportes: reportes,

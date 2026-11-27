@@ -12,7 +12,7 @@ class AppDatabase {
   AppDatabase._();
 
   static const String nombreArchivo = 'ecotrack.db';
-  static const int version = 1;
+  static const int version = 2;
 
   static Future<Database>? _cache;
 
@@ -25,7 +25,21 @@ class AppDatabase {
       ruta,
       version: version,
       onCreate: crearEsquema,
+      onUpgrade: migrar,
     );
+  }
+
+  /// Migracion v1 -> v2: agrega la columna `lugar` (ilustracion de zona).
+  ///
+  /// Las filas existentes quedan en `residencial` (el valor por defecto del
+  /// dominio) hasta la proxima sincronizacion con la nube.
+  static Future<void> migrar(Database db, int desde, int hasta) async {
+    if (desde < 2) {
+      await db.execute(
+        'ALTER TABLE zonas ADD COLUMN lugar INTEGER NOT NULL '
+        'DEFAULT ${TipoLugar.residencial.index}',
+      );
+    }
   }
 
   /// Crea las tablas y siembra el catalogo inicial de zonas para que la
@@ -53,7 +67,8 @@ class AppDatabase {
         ruta TEXT NOT NULL,
         riesgo INTEGER NOT NULL,
         entregas INTEGER NOT NULL,
-        tipo_icono INTEGER NOT NULL
+        tipo_icono INTEGER NOT NULL,
+        lugar INTEGER NOT NULL DEFAULT ${TipoLugar.residencial.index}
       )
     ''');
 
@@ -80,6 +95,7 @@ class ZonaSemillas {
       riesgo: 1,
       entregasPendientes: 3,
       tipoIcono: Zona.tipoCamion,
+      lugar: TipoLugar.puerto,
     ),
     Zona(
       id: 'z_2',
@@ -88,6 +104,7 @@ class ZonaSemillas {
       riesgo: 3,
       entregasPendientes: 12,
       tipoIcono: Zona.tipoRuta,
+      lugar: TipoLugar.vialidad,
     ),
     Zona(
       id: 'z_3',
@@ -96,6 +113,7 @@ class ZonaSemillas {
       riesgo: 4,
       entregasPendientes: 8,
       tipoIcono: Zona.tipoAlerta,
+      lugar: TipoLugar.industrial,
     ),
     Zona(
       id: 'z_4',
@@ -104,6 +122,7 @@ class ZonaSemillas {
       riesgo: 2,
       entregasPendientes: 5,
       tipoIcono: Zona.tipoPaquete,
+      lugar: TipoLugar.mercado,
     ),
     Zona(
       id: 'z_5',
@@ -112,6 +131,7 @@ class ZonaSemillas {
       riesgo: 2,
       entregasPendientes: 14,
       tipoIcono: Zona.tipoRuta,
+      lugar: TipoLugar.parque,
     ),
     Zona(
       id: 'z_6',
@@ -120,6 +140,7 @@ class ZonaSemillas {
       riesgo: 1,
       entregasPendientes: 0,
       tipoIcono: Zona.tipoCamion,
+      lugar: TipoLugar.industrial,
     ),
   ];
 }
