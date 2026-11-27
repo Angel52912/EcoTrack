@@ -11,6 +11,7 @@ class ZonaModel extends Zona {
     required super.riesgo,
     required super.entregasPendientes,
     required super.tipoIcono,
+    super.lugar,
   });
 
   static const List<String> columnas = [
@@ -20,6 +21,7 @@ class ZonaModel extends Zona {
     'riesgo',
     'entregas',
     'tipo_icono',
+    'lugar',
   ];
 
   Map<String, Object?> toMap() => {
@@ -29,6 +31,7 @@ class ZonaModel extends Zona {
         'riesgo': riesgo,
         'entregas': entregasPendientes,
         'tipo_icono': tipoIcono,
+        'lugar': lugar.index,
       };
 
   factory ZonaModel.fromMap(Map<String, Object?> mapa) => ZonaModel(
@@ -38,6 +41,9 @@ class ZonaModel extends Zona {
         riesgo: (mapa['riesgo']! as num).toInt(),
         entregasPendientes: (mapa['entregas']! as num).toInt(),
         tipoIcono: (mapa['tipo_icono']! as num).toInt(),
+        // Columna agregada en la migracion v2; las filas viejas traen NULL.
+        lugar: TipoLugar.values[
+            (mapa['lugar'] as num?)?.toInt() ?? TipoLugar.residencial.index],
       );
 
   factory ZonaModel.deEntidad(Zona entidad) => ZonaModel(
@@ -47,6 +53,7 @@ class ZonaModel extends Zona {
         riesgo: entidad.riesgo,
         entregasPendientes: entidad.entregasPendientes,
         tipoIcono: entidad.tipoIcono,
+        lugar: entidad.lugar,
       );
 
   /// Mapea un objeto JSON proveniente de la API REST publica a una zona.
@@ -66,6 +73,9 @@ class ZonaModel extends Zona {
       riesgo: (id % 4) + 1,
       entregasPendientes: (id * 7) % 15,
       tipoIcono: id % 4,
+      // Reparto determinista para que cada zona descargada ilustre un lugar
+      // distinto (la API no expone tipo de lugar).
+      lugar: TipoLugar.values[id % TipoLugar.values.length],
     );
   }
 }

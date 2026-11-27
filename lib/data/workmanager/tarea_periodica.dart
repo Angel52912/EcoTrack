@@ -98,6 +98,9 @@ Future<int> _sincronizarColaLocal(String? rutaBase) async {
     options: OpenDatabaseOptions(
       version: AppDatabase.version,
       onCreate: AppDatabase.crearEsquema,
+      // Obligatorio: sin este callback sqflite subiria la version a 2 sin
+      // agregar la columna `lugar` y las consultas fallarian.
+      onUpgrade: AppDatabase.migrar,
     ),
   );
 

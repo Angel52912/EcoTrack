@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../controllers/alerta_controller.dart';
 import '../controllers/formulario_controller.dart';
 import '../controllers/reporte_controller.dart';
+import 'estilos.dart';
 
 /// Modulo 2.2 - Captura validada (`Form` + `GlobalKey<FormState>`).
 ///
@@ -174,7 +175,17 @@ class _NuevoReporteViewState extends State<NuevoReporteView> {
                           for (final categoria in formulario.categorias)
                             DropdownMenuItem(
                               value: categoria,
-                              child: Text(categoria),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Estilos.iconoCategoria(categoria),
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(categoria),
+                                ],
+                              ),
                             ),
                         ],
                         onChanged: formulario.asignarCategoria,
@@ -184,7 +195,12 @@ class _NuevoReporteViewState extends State<NuevoReporteView> {
                       // ---- Prioridad (slider observable) -----------------
                       Row(
                         children: [
-                          const Icon(Icons.flag_outlined),
+                          Icon(
+                            Icons.flag_outlined,
+                            color: Estilos.colorPrioridad(
+                              formulario.prioridad,
+                            ),
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Column(
@@ -194,6 +210,12 @@ class _NuevoReporteViewState extends State<NuevoReporteView> {
                                   'Prioridad: ${formulario.prioridad} '
                                   '(${_etiqueta(formulario.prioridad)})',
                                   key: const Key('etiqueta_prioridad'),
+                                  style: TextStyle(
+                                    color: Estilos.colorPrioridad(
+                                      formulario.prioridad,
+                                    ),
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 Slider(
                                   value: formulario.prioridad.toDouble(),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/reporte.dart';
 import '../controllers/catalogo_controller.dart';
 import '../controllers/reporte_controller.dart';
+import 'estilos.dart';
+import 'ilustraciones.dart';
 
 /// Modulo 2.1 y 2.3 - Vista pasiva del panel principal.
 ///
@@ -265,24 +267,46 @@ class _TarjetaReporte extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final esquema = Theme.of(context).colorScheme;
-
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
         key: Key('tarjeta_${reporte.id}'),
-        leading: CircleAvatar(
-          backgroundColor: reporte.esCritico
-              ? esquema.errorContainer
-              : esquema.primaryContainer,
-          child: Text(
-            '${reporte.prioridad}',
-            style: TextStyle(
-              color: reporte.esCritico
-                  ? esquema.onErrorContainer
-                  : esquema.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
-            ),
+        // Miniatura ilustrada de la categoria + badge de prioridad
+        // (los colores salen de `Estilos`, no del build).
+        leading: SizedBox(
+          width: 48,
+          height: 48,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Ilustracion(
+                escena: Escena.deCategoria(reporte.categoria),
+                radio: 24,
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Estilos.colorPrioridad(reporte.prioridad),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: Text(
+                    '${reporte.prioridad}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         title: Text(reporte.titulo),
