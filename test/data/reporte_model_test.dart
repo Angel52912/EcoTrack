@@ -89,6 +89,7 @@ void main() {
         riesgo: 3,
         entregasPendientes: 11,
         tipoIcono: Zona.tipoPaquete,
+        lugar: TipoLugar.puerto,
       );
 
       // Act
@@ -98,12 +99,38 @@ void main() {
       // Assert
       expect(mapa.keys.toList(), ZonaModel.columnas);
       expect(mapa['entregas'], 11);
+      expect(mapa['lugar'], TipoLugar.puerto.index);
       expect(restaurada.nombre, 'Zona Norte');
       expect(restaurada.etiquetaRiesgo, 'Alta');
+      expect(restaurada.lugar, TipoLugar.puerto);
       expect(restaurada, zona);
     });
 
-    test('Arrange: JSON de la API | Act: desdeApi | Assert: dominio poblado', () {
+    test(
+        'Arrange: fila vieja sin la columna lugar | Act: fromMap | '
+        'Assert: asume el lugar por defecto del dominio', () {
+      // Arrange: una fila anterior a la migracion v2 no trae `lugar`.
+      final fila = ZonaModel.deEntidad(
+        Zona(
+          id: 'z_old',
+          nombre: 'Zona historica',
+          ruta: 'RUTA-V1',
+          riesgo: 2,
+          entregasPendientes: 4,
+          tipoIcono: Zona.tipoRuta,
+        ),
+      ).toMap()
+        ..remove('lugar');
+
+      // Act
+      final modelo = ZonaModel.fromMap(fila);
+
+      // Assert
+      expect(modelo.lugar, TipoLugar.residencial);
+    });
+
+    test('Arrange: JSON de la API | Act: desdeApi | Assert: dominio poblado',
+        () {
       // Arrange
       final json = {'id': 3, 'albumId': 2, 'title': 'ruta del campo'};
 
@@ -116,6 +143,8 @@ void main() {
       expect(zona.nombre, 'RUTA DEL CAMPO');
       expect(zona.riesgo, inInclusiveRange(1, 4));
       expect(zona.entregasPendientes, greaterThanOrEqualTo(0));
+      // La API no expone tipo de lugar: se reparte de forma determinista.
+      expect(TipoLugar.values, contains(zona.lugar));
     });
   });
 }

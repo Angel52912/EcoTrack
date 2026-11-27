@@ -1,3 +1,17 @@
+/// Tipo de lugar que cubre una zona. La capa `presentation` lo usa para
+/// elegir la ilustracion (`Escena`) que la representa en la grilla.
+enum TipoLugar {
+  centro,
+  industrial,
+  parque,
+  vialidad,
+  mercado,
+  residencial,
+  puerto,
+  aeropuerto,
+  universidad;
+}
+
 /// Modulo 1 - Capa `domain`.
 ///
 /// Entidad inmutable que representa una zona / ruta del catalogo
@@ -19,6 +33,7 @@ class Zona {
   final int _riesgo;
   final int _entregasPendientes;
   final int _tipoIcono;
+  final TipoLugar _lugar;
 
   Zona({
     required String id,
@@ -27,12 +42,14 @@ class Zona {
     required int riesgo,
     required int entregasPendientes,
     required int tipoIcono,
+    TipoLugar lugar = TipoLugar.residencial,
   })  : _id = id,
         _nombre = nombre,
         _ruta = ruta,
         _riesgo = riesgo,
         _entregasPendientes = entregasPendientes,
         _tipoIcono = tipoIcono,
+        _lugar = lugar,
         // Aserciones de integridad en la lista de inicializacion.
         assert(id.trim().isNotEmpty, 'El id de la zona no puede estar vacio'),
         assert(
@@ -59,6 +76,7 @@ class Zona {
   int get riesgo => _riesgo;
   int get entregasPendientes => _entregasPendientes;
   int get tipoIcono => _tipoIcono;
+  TipoLugar get lugar => _lugar;
 
   // ---------------------------------------------------------------------------
   // Getters computados.

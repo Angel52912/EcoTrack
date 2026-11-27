@@ -15,6 +15,7 @@ class ZonaDao {
     'riesgo',
     'entregas',
     'tipo_icono',
+    'lugar',
   ];
 
   /// Lectura con columnas explicitas y orden por riesgo descendente.
